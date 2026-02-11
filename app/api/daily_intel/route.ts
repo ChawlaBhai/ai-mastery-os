@@ -6,7 +6,7 @@ import { NextResponse } from "next/server";
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
 const supabase = createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+    process.env.SUPABASE_SERVICE_ROLE_KEY!
 );
 
 export async function GET() {
@@ -42,7 +42,7 @@ Return structured JSON:
 `;
 
         // 2. Call Gemini API
-        const model = genAI.getGenerativeModel({ model: "gemini-2.5-pro", generationConfig: { responseMimeType: "application/json" } });
+        const model = genAI.getGenerativeModel({ model: "gemini-pro-latest", generationConfig: { responseMimeType: "application/json" } });
         const result = await model.generateContent(prompt);
         const responseText = result.response.text();
 
