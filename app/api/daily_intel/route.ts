@@ -57,7 +57,8 @@ Return structured JSON:
             .insert([
                 {
                     report: storedJson,
-                    created_at: new Date().toISOString()
+                    created_at: new Date().toISOString(),
+                    report_date: new Date().toISOString().split("T")[0]
                 }
             ])
             .select();
