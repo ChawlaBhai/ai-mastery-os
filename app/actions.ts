@@ -67,3 +67,18 @@ export async function getLatestReport() {
         date: data.report_date || new Date(data.created_at).toISOString().split('T')[0]
     };
 }
+
+export async function getPreviousWeeklyReviews() {
+    const { data, error } = await supabase
+        .from("weekly_reviews")
+        .select("*")
+        .order("created_at", { ascending: false })
+        .limit(3);
+
+    if (error) {
+        console.error("Error fetching weekly reviews:", error);
+        return [];
+    }
+
+    return data as import("./types").WeeklyReview[];
+}
