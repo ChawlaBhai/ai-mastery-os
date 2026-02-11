@@ -2,7 +2,7 @@
     "crons": [
         {
             "path": "/api/daily-intel",
-            "schedule": "30 3 * * *"
+            "schedule": "*/5 * * * *"
         }
     ]
 }
