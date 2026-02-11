@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { WeeklyReview, WeeklyPlan } from '../types';
 
 interface WeeklyReviewClientProps {
@@ -14,6 +14,12 @@ export default function WeeklyReviewClient({ initialHistory }: WeeklyReviewClien
     // Auto-load the most recent review if available
     const [currentReview, setCurrentReview] = useState<WeeklyReview | null>(initialHistory.length > 0 ? initialHistory[0] : null);
     const [error, setError] = useState<string | null>(null);
+    const [isMounted, setIsMounted] = useState(false);
+
+    // Prevent hydration mismatch by only rendering date-dependent UI after mount
+    useEffect(() => {
+        setIsMounted(true);
+    }, []);
 
     const handleSubmit = async () => {
         if (!input.trim()) return;
@@ -55,6 +61,12 @@ export default function WeeklyReviewClient({ initialHistory }: WeeklyReviewClien
             setCurrentReview(selected);
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
+    };
+
+    // Helper to safely render dates
+    const renderDate = (dateStr: string, options?: Intl.DateTimeFormatOptions) => {
+        if (!isMounted) return '';
+        return new Date(dateStr).toLocaleDateString(undefined, options);
     };
 
     return (
@@ -105,8 +117,8 @@ export default function WeeklyReviewClient({ initialHistory }: WeeklyReviewClien
                             <button onClick={() => setCurrentReview(null)} className="text-gray-500 hover:text-white transition-colors flex items-center gap-2">
                                 ← New Reflection
                             </button>
-                            <div className="text-gray-600">
-                                {new Date(currentReview.created_at).toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
+                            <div className="text-gray-600 min-h-[1.5em]">
+                                {renderDate(currentReview.created_at, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
                             </div>
                         </div>
 
@@ -188,7 +200,7 @@ export default function WeeklyReviewClient({ initialHistory }: WeeklyReviewClien
                             <span className="group-hover:-translate-x-1 transition-transform">←</span> Back to Daily Intel
                         </a>
 
-                        {history.length > 0 && (
+                        {isMounted && history.length > 0 && (
                             <div className="w-full max-w-md space-y-2">
                                 <label className="text-xs uppercase tracking-widest text-[#a8a8a8] font-semibold text-center block">Past Weekly Reviews</label>
                                 <select
@@ -199,7 +211,7 @@ export default function WeeklyReviewClient({ initialHistory }: WeeklyReviewClien
                                     <option value="" disabled>Select a previous week...</option>
                                     {history.map((review) => (
                                         <option key={review.id} value={review.id}>
-                                            {new Date(review.created_at).toLocaleDateString('en-US')} — {review.output_plan.primary_focus}
+                                            {renderDate(review.created_at)} — {review.output_plan.primary_focus}
                                         </option>
                                     ))}
                                 </select>
