@@ -83,10 +83,6 @@ export default function DashboardClient({ initialReport, initialId, availableRep
                     </div>
 
                     <div className="flex items-center gap-3">
-                        <a href="/weekly" className="text-sm text-gray-400 hover:text-white transition-colors bg-white/5 px-4 py-2 rounded-md border border-white/5 hover:border-white/10 mr-2">
-                            Weekly Coach →
-                        </a>
-
                         <button
                             onClick={handlePrev}
                             disabled={!hasPrev || loading}
@@ -202,6 +198,14 @@ export default function DashboardClient({ initialReport, initialId, availableRep
                         )}
                     </>
                 )}
+
+
+                {/* Footer Navigation */}
+                <div className="flex justify-center pt-8 border-t border-white/5">
+                    <a href="/weekly" className="text-sm text-gray-500 hover:text-white transition-colors flex items-center gap-2 group">
+                        Go to Weekly Coach <span className="group-hover:translate-x-1 transition-transform">→</span>
+                    </a>
+                </div>
 
             </div>
         </main>

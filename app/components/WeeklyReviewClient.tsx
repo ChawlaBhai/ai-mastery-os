@@ -52,6 +52,7 @@ export default function WeeklyReviewClient({ initialHistory }: WeeklyReviewClien
         const selected = history.find(r => r.id === id);
         if (selected) {
             setCurrentReview(selected);
+            window.scrollTo({ top: 0, behavior: 'smooth' });
         }
     };
 
@@ -60,30 +61,9 @@ export default function WeeklyReviewClient({ initialHistory }: WeeklyReviewClien
             <div className="max-w-4xl mx-auto px-6 py-12 md:py-20 space-y-16">
 
                 {/* Header */}
-                <header className="flex flex-col md:flex-row justify-between items-center gap-6">
-                    <div className="space-y-2 text-center md:text-left">
-                        <h1 className="text-2xl md:text-3xl font-medium tracking-tight text-white">Weekly AI Coach</h1>
-                        <p className="text-gray-500">Accelerate your mastery through structured reflection.</p>
-                    </div>
-                    <div className="flex items-center gap-4">
-                        <a href="/" className="text-sm text-gray-400 hover:text-white transition-colors bg-white/5 px-4 py-2 rounded-lg border border-white/5 hover:border-white/10">
-                            ← Daily Intel
-                        </a>
-                        {history.length > 0 && (
-                            <select
-                                onChange={(e) => handleHistorySelect(e.target.value)}
-                                className="bg-[#1a1a1a] text-white border border-white/10 rounded-lg px-4 py-2 text-sm focus:outline-none focus:border-white/30 cursor-pointer hover:bg-[#252525] transition-colors"
-                                defaultValue=""
-                            >
-                                <option value="" disabled>Past Reviews</option>
-                                {history.map((review) => (
-                                    <option key={review.id} value={review.id}>
-                                        {new Date(review.created_at).toLocaleDateString()} - {review.output_plan.primary_focus.substring(0, 20)}...
-                                    </option>
-                                ))}
-                            </select>
-                        )}
-                    </div>
+                <header className="text-center space-y-2">
+                    <h1 className="text-2xl md:text-3xl font-medium tracking-tight text-white">Weekly AI Coach</h1>
+                    <p className="text-gray-500">Accelerate your mastery through structured reflection.</p>
                 </header>
 
                 {/* Section 1: Reflection Input (Hidden if viewing a review) */}
@@ -199,6 +179,33 @@ export default function WeeklyReviewClient({ initialHistory }: WeeklyReviewClien
                         </div>
                     </div>
                 )}
+
+                {/* Footer Navigation & History */}
+                <section className="pt-16 border-t border-white/5 space-y-8">
+                    <div className="flex flex-col items-center gap-6">
+                        <a href="/" className="text-sm text-gray-500 hover:text-white transition-colors flex items-center gap-2 group">
+                            <span className="group-hover:-translate-x-1 transition-transform">←</span> Back to Daily Intel
+                        </a>
+
+                        {history.length > 0 && (
+                            <div className="w-full max-w-md space-y-2">
+                                <label className="text-xs uppercase tracking-widest text-[#a8a8a8] font-semibold text-center block">Past Weekly Reviews</label>
+                                <select
+                                    value={currentReview?.id || ""}
+                                    onChange={(e) => handleHistorySelect(e.target.value)}
+                                    className="w-full bg-[#1a1a1a] text-white border border-white/10 rounded-lg px-4 py-3 text-sm focus:outline-none focus:border-white/30 cursor-pointer hover:bg-[#252525] transition-colors appearance-none text-center"
+                                >
+                                    <option value="" disabled>Select a previous week...</option>
+                                    {history.map((review) => (
+                                        <option key={review.id} value={review.id}>
+                                            {new Date(review.created_at).toLocaleDateString()} — {review.output_plan.primary_focus}
+                                        </option>
+                                    ))}
+                                </select>
+                            </div>
+                        )}
+                    </div>
+                </section>
             </div>
         </main>
     );
