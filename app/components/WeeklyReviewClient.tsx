@@ -11,7 +11,8 @@ export default function WeeklyReviewClient({ initialHistory }: WeeklyReviewClien
     const [history, setHistory] = useState<WeeklyReview[]>(initialHistory);
     const [input, setInput] = useState('');
     const [isLoading, setIsLoading] = useState(false);
-    const [currentReview, setCurrentReview] = useState<WeeklyReview | null>(null);
+    // Auto-load the most recent review if available
+    const [currentReview, setCurrentReview] = useState<WeeklyReview | null>(initialHistory.length > 0 ? initialHistory[0] : null);
     const [error, setError] = useState<string | null>(null);
 
     const handleSubmit = async () => {
@@ -105,7 +106,7 @@ export default function WeeklyReviewClient({ initialHistory }: WeeklyReviewClien
                                 ← New Reflection
                             </button>
                             <div className="text-gray-600">
-                                {new Date(currentReview.created_at).toLocaleDateString(undefined, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
+                                {new Date(currentReview.created_at).toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
                             </div>
                         </div>
 
@@ -198,7 +199,7 @@ export default function WeeklyReviewClient({ initialHistory }: WeeklyReviewClien
                                     <option value="" disabled>Select a previous week...</option>
                                     {history.map((review) => (
                                         <option key={review.id} value={review.id}>
-                                            {new Date(review.created_at).toLocaleDateString()} — {review.output_plan.primary_focus}
+                                            {new Date(review.created_at).toLocaleDateString('en-US')} — {review.output_plan.primary_focus}
                                         </option>
                                     ))}
                                 </select>
