@@ -56,7 +56,11 @@ export default function WeeklyReviewClient({ initialHistory }: WeeklyReviewClien
     };
 
     const handleHistorySelect = (id: string) => {
-        const selected = history.find(r => r.id === id);
+        console.log("Selecting history ID:", id);
+        // loose equality check in case of string/number mismatch, or coerce both
+        const selected = history.find(r => String(r.id) === String(id));
+        console.log("Found review:", selected);
+
         if (selected) {
             setCurrentReview(selected);
             window.scrollTo({ top: 0, behavior: 'smooth' });
