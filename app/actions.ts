@@ -21,9 +21,11 @@ export async function getAvailableDates() {
     }
 
     // Return unique dates (using report_date if available, else falling back to created_at)
-    return data.map(item => {
+    const allDates = data.map(item => {
         return item.report_date || new Date(item.created_at).toISOString().split('T')[0];
     });
+
+    return Array.from(new Set(allDates));
 }
 
 export async function getReportByDate(date: string) {
