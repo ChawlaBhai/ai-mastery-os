@@ -9,55 +9,39 @@ const supabase = createClient(
     process.env.SUPABASE_SERVICE_ROLE_KEY!
 );
 
-export async function getAvailableDates() {
+export async function getAvailableReports() {
     const { data, error } = await supabase
         .from("daily_reports")
-        .select("created_at, report_date")
+        .select("id, created_at, report_date")
         .order("created_at", { ascending: false });
 
     if (error) {
-        console.error("Error fetching dates:", error);
+        console.error("Error fetching available reports:", error);
         return [];
     }
 
-    // Return unique dates (using report_date if available, else falling back to created_at)
-    const allDates = data.map(item => {
-        return item.report_date || new Date(item.created_at).toISOString().split('T')[0];
-    });
-
-    return Array.from(new Set(allDates));
+    return data.map(item => ({
+        id: item.id,
+        date: item.report_date || new Date(item.created_at).toISOString().split('T')[0],
+        label: new Date(item.created_at).toLocaleDateString('en-US', {
+            weekday: 'short',
+            month: 'short',
+            day: 'numeric',
+            hour: 'numeric',
+            minute: '2-digit'
+        })
+    }));
 }
 
-export async function getReportByDate(date: string) {
-    // Try to match by report_date first
-    let query = supabase
+export async function getReportById(id: string) {
+    const { data, error } = await supabase
         .from("daily_reports")
         .select("report")
-        .eq("report_date", date)
-        .limit(1)
+        .eq("id", id)
         .single();
 
-    let { data, error } = await query;
-
-    // Fallback: If no report_date match, try matching by created_at (start of day to end of day)
-    if (error || !data) {
-        const startOfDay = new Date(date).toISOString();
-        const endOfDay = new Date(new Date(date).setHours(23, 59, 59, 999)).toISOString();
-
-        const fallbackQuery = await supabase
-            .from("daily_reports")
-            .select("report")
-            .gte("created_at", startOfDay)
-            .lte("created_at", endOfDay)
-            .limit(1)
-            .single();
-
-        data = fallbackQuery.data;
-        error = fallbackQuery.error;
-    }
-
     if (error) {
-        console.error(`Error fetching report for ${date}:`, error);
+        console.error(`Error fetching report for id ${id}:`, error);
         return null;
     }
 
@@ -67,7 +51,7 @@ export async function getReportByDate(date: string) {
 export async function getLatestReport() {
     const { data, error } = await supabase
         .from("daily_reports")
-        .select("report, created_at, report_date")
+        .select("id, report, created_at, report_date")
         .order("created_at", { ascending: false })
         .limit(1)
         .single();
@@ -78,6 +62,7 @@ export async function getLatestReport() {
     }
 
     return {
+        id: data.id,
         report: data.report as Report,
         date: data.report_date || new Date(data.created_at).toISOString().split('T')[0]
     };

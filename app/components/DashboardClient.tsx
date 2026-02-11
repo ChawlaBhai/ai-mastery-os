@@ -1,25 +1,31 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { Report } from '../types';
-import { getReportByDate } from '../actions';
+import { getReportById } from '../actions';
 
 interface DashboardClientProps {
     initialReport: Report | null;
-    initialDate: string;
-    availableDates: string[];
+    initialId: string;
+    availableReports: { id: string; date: string; label: string }[];
 }
 
-export default function DashboardClient({ initialReport, initialDate, availableDates }: DashboardClientProps) {
+export default function DashboardClient({ initialReport, initialId, availableReports }: DashboardClientProps) {
     const [report, setReport] = useState<Report | null>(initialReport);
-    const [selectedDate, setSelectedDate] = useState<string>(initialDate);
+    const [selectedId, setSelectedId] = useState<string>(initialId);
     const [loading, setLoading] = useState(false);
 
-    const handleDateChange = async (date: string) => {
+    // Get current report details for display
+    const currentReportMeta = useMemo(() =>
+        availableReports.find(r => r.id === selectedId),
+        [selectedId, availableReports]
+    );
+
+    const handleReportChange = async (id: string) => {
         setLoading(true);
-        setSelectedDate(date);
+        setSelectedId(id);
         try {
-            const newReport = await getReportByDate(date);
+            const newReport = await getReportById(id);
             setReport(newReport);
         } catch (error) {
             console.error("Failed to fetch report:", error);
@@ -29,44 +35,35 @@ export default function DashboardClient({ initialReport, initialDate, availableD
         }
     };
 
-    const handlePrevDay = () => {
-        const currentIndex = availableDates.indexOf(selectedDate);
-        if (currentIndex < availableDates.length - 1) {
-            handleDateChange(availableDates[currentIndex + 1]);
+    const handlePrev = () => {
+        const currentIndex = availableReports.findIndex(r => r.id === selectedId);
+        if (currentIndex < availableReports.length - 1) {
+            handleReportChange(availableReports[currentIndex + 1].id);
         }
     };
 
-    const handleNextDay = () => {
-        const currentIndex = availableDates.indexOf(selectedDate);
+    const handleNext = () => {
+        const currentIndex = availableReports.findIndex(r => r.id === selectedId);
         if (currentIndex > 0) {
-            handleDateChange(availableDates[currentIndex - 1]);
+            handleReportChange(availableReports[currentIndex - 1].id);
         }
     };
 
-    const currentIndex = availableDates.indexOf(selectedDate);
-    const hasPrev = currentIndex < availableDates.length - 1;
+    const currentIndex = availableReports.findIndex(r => r.id === selectedId);
+    const hasPrev = currentIndex < availableReports.length - 1;
     const hasNext = currentIndex > 0;
 
     if (!report && !loading) {
         return (
             <div className="min-h-screen bg-[#121212] text-gray-400 flex flex-col items-center justify-center gap-4">
-                <p>No report available for {selectedDate}.</p>
+                <p>No report available.</p>
                 <div className="flex gap-4">
                     <button
-                        onClick={() => handleDateChange(availableDates[0])}
+                        onClick={() => handleReportChange(availableReports[0]?.id)}
                         className="text-sm px-4 py-2 bg-white/10 hover:bg-white/20 rounded-md transition-colors text-white"
                     >
                         Go to Latest
                     </button>
-                    <select
-                        value={selectedDate}
-                        onChange={(e) => handleDateChange(e.target.value)}
-                        className="bg-[#1a1a1a] text-white border border-white/10 rounded-md px-3 py-2 text-sm focus:outline-none focus:border-white/30"
-                    >
-                        {availableDates.map(date => (
-                            <option key={date} value={date}>{date}</option>
-                        ))}
-                    </select>
                 </div>
             </div>
         );
@@ -81,13 +78,13 @@ export default function DashboardClient({ initialReport, initialDate, availableD
                     <div className="space-y-2">
                         <h1 className="text-xl md:text-2xl font-medium tracking-tight text-white">Daily Intelligence</h1>
                         <p className="text-sm text-gray-500">
-                            {new Date(selectedDate).toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' })}
+                            {currentReportMeta?.label}
                         </p>
                     </div>
 
                     <div className="flex items-center gap-3">
                         <button
-                            onClick={handlePrevDay}
+                            onClick={handlePrev}
                             disabled={!hasPrev || loading}
                             className="p-2 rounded-md hover:bg-white/5 disabled:opacity-30 disabled:cursor-not-allowed transition-colors text-gray-400 hover:text-white"
                             title="Previous Report"
@@ -96,18 +93,18 @@ export default function DashboardClient({ initialReport, initialDate, availableD
                         </button>
 
                         <select
-                            value={selectedDate}
-                            onChange={(e) => handleDateChange(e.target.value)}
+                            value={selectedId}
+                            onChange={(e) => handleReportChange(e.target.value)}
                             disabled={loading}
-                            className="bg-[#1a1a1a] text-white border border-white/10 rounded-md px-3 py-2 text-sm focus:outline-none focus:border-white/30 cursor-pointer hover:bg-[#252525] transition-colors"
+                            className="bg-[#1a1a1a] text-white border border-white/10 rounded-md px-3 py-2 text-sm focus:outline-none focus:border-white/30 cursor-pointer hover:bg-[#252525] transition-colors max-w-[200px]"
                         >
-                            {availableDates.map(date => (
-                                <option key={date} value={date}>{date}</option>
+                            {availableReports.map(item => (
+                                <option key={item.id} value={item.id}>{item.label}</option>
                             ))}
                         </select>
 
                         <button
-                            onClick={handleNextDay}
+                            onClick={handleNext}
                             disabled={!hasNext || loading}
                             className="p-2 rounded-md hover:bg-white/5 disabled:opacity-30 disabled:cursor-not-allowed transition-colors text-gray-400 hover:text-white"
                             title="Next Report"

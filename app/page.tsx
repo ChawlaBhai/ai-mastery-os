@@ -1,10 +1,10 @@
-import { getLatestReport, getAvailableDates } from "./actions";
+import { getLatestReport, getAvailableReports } from "./actions";
 import DashboardClient from "./components/DashboardClient";
 
 export const revalidate = 0; // Disable caching to always get the latest report
 
 export default async function DashboardPage() {
-    const availableDates = await getAvailableDates();
+    const availableReports = await getAvailableReports();
     const latestData = await getLatestReport();
 
     if (!latestData) {
@@ -18,8 +18,8 @@ export default async function DashboardPage() {
     return (
         <DashboardClient
             initialReport={latestData.report}
-            initialDate={latestData.date}
-            availableDates={availableDates}
+            initialId={latestData.id}
+            availableReports={availableReports}
         />
     );
 }
