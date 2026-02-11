@@ -83,6 +83,10 @@ export default function DashboardClient({ initialReport, initialId, availableRep
                     </div>
 
                     <div className="flex items-center gap-3">
+                        <a href="/weekly" className="text-sm text-gray-400 hover:text-white transition-colors bg-white/5 px-4 py-2 rounded-md border border-white/5 hover:border-white/10 mr-2">
+                            Weekly Coach →
+                        </a>
+
                         <button
                             onClick={handlePrev}
                             disabled={!hasPrev || loading}
