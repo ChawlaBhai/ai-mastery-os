@@ -7,10 +7,20 @@ const supabase = createClient(
 );
 
 // Define Report Type
+type ReportItem = {
+    name: string;
+    type?: string;
+    details?: string;
+    reason?: string;
+    action?: string;
+    impact_score?: string;
+    relevance?: string;
+};
+
 type Report = {
-    must_explore: string[];
-    worth_watching: string[];
-    ignore: string[];
+    must_explore: ReportItem[];
+    worth_watching: ReportItem[];
+    ignore: ReportItem[];
     today_focus: string;
 };
 
@@ -76,7 +86,18 @@ export default async function Dashboard() {
                         <ul className="space-y-3">
                             {report.must_explore.map((item, i) => (
                                 <li key={i} className="group p-4 rounded-lg bg-[#1a1a1a] border border-white/5 hover:border-white/10 transition-colors">
-                                    <span className="text-gray-200 group-hover:text-white transition-colors">{item}</span>
+                                    <div className="flex justify-between items-start">
+                                        <span className="text-gray-200 group-hover:text-white transition-colors font-medium">{item.name}</span>
+                                        {item.impact_score && (
+                                            <span className="text-xs text-orange-400/80 bg-orange-400/10 px-2 py-0.5 rounded">{item.impact_score}</span>
+                                        )}
+                                    </div>
+                                    {item.details && (
+                                        <p className="text-sm text-gray-500 mt-2 leading-relaxed">{item.details}</p>
+                                    )}
+                                    {item.action && (
+                                        <p className="text-xs text-gray-600 mt-2 uppercase tracking-wide">Action: {item.action}</p>
+                                    )}
                                 </li>
                             ))}
                         </ul>
@@ -92,7 +113,8 @@ export default async function Dashboard() {
                         <ul className="space-y-2">
                             {report.worth_watching.map((item, i) => (
                                 <li key={i} className="px-4 py-3 rounded-lg bg-[#1a1a1a]/50 border border-white/5 text-gray-400 text-sm">
-                                    {item}
+                                    <div className="font-medium text-gray-300">{item.name}</div>
+                                    {item.details && <div className="mt-1 opacity-80">{item.details}</div>}
                                 </li>
                             ))}
                         </ul>
@@ -108,7 +130,8 @@ export default async function Dashboard() {
                         <ul className="space-y-2">
                             {report.ignore.map((item, i) => (
                                 <li key={i} className="px-4 py-2 rounded text-sm text-gray-500 border-l-2 border-white/5 pl-4">
-                                    {item}
+                                    <span className="font-medium text-gray-400">{item.name}</span>
+                                    {item.reason && <span className="ml-2 opacity-50">- {item.reason}</span>}
                                 </li>
                             ))}
                         </ul>
